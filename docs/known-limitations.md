@@ -1,0 +1,15 @@
+# Known limitations
+
+- Elevated, protected or self-positioning applications can refuse moves. There is no automatic elevation. Individual failures do not cancel the other window moves.
+- Exclusive full screen, games, special UWP/WinUI containers and hardware overlays cannot be controlled in general. Pure CoreWindow/shell surfaces are excluded; classic ApplicationFrame windows can be captured.
+- The visible geometry of detected Snap tiles is transferred; Windows-internal Snap groups, their shared resizing and the shell's own undocking are not reconstructed. Application-specific layout or docking states are not part of the snapshot. Detection supports common halves, quarters and thirds; free windows are moved based on their actual position and size.
+- There is exactly one global foreground window. Windows can reject the regular attempt to restore focus. Perfect Z-order preservation cannot be guaranteed for every foreign dialog/topmost implementation.
+- User changes within a tolerance of 3 physical pixels cannot be reliably distinguished from Windows rounding. Undo uses this tolerance. HWND recycling within the same process/thread with the same class and matching geometry cannot be detected unambiguously.
+- Minimized windows are assigned by their stored normal position. For owner/dialog groups that are already spread across several monitors, the root owner determines the route.
+- Very small displays, fixed minimum sizes and applications with their own positioning rules can prevent a complete fit. Later size changes after a DPI change are corrected at most twice within the short waiting budget. Remaining deviations of detected tiles are reported; applications that react very late are not monitored permanently.
+- Native changes are sent asynchronously and briefly verified with a shared waiting budget after all moves have been submitted. An application that hangs for a long time may only react after the check has ended. Such late changes may then not be part of the Undo set. No foreign process is terminated or injected.
+- Fixed monitor actions may need to be reassigned manually after driver, cable, dock or clone changes. Without stable device paths, an assignment only lasts until the program restarts.
+- Undo stays in memory and covers one action. After changes to work areas, resolution or monitor positions, restoring is safely deferred until the matching layout exists again.
+- Explorer restart, sign-in/autostart, RDP and sleep need additional interactive system tests. Which cases were actually tested is listed in testing.md. Windows 10 and a clean VM without Python are not verified automatically here.
+- Translations: names of actions that already exist in a profile are not translated when the language changes. Hotkey conflict messages created at startup stay in the language that was active then until the hotkey is registered again.
+- The release is unsigned. Portable use refers to the program folder; the user configuration and logs still live in the user profile.

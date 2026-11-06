@@ -1,0 +1,40 @@
+name: Bug report
+description: Something does not work as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to report a problem! Please check the [known limitations](https://github.com/loopnlucid/MoniRondo/blob/main/docs/known-limitations.md) first.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Snap a window to the left half of monitor 1
+        2. Press Ctrl+Alt+Page Down
+        3. ...
+  - type: textarea
+    id: monitors
+    attributes:
+      label: Monitor setup
+      description: Resolutions, scaling (e.g. 100 % / 125 %) and arrangement of your monitors.
+  - type: input
+    id: applications
+    attributes:
+      label: Affected applications
+      description: Which applications' windows behave wrongly (e.g. browser, terminal, Office)?
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostic report
+      description: Settings → Diagnostics / About → Copy diagnostic report. It contains no window titles.
+      render: text
+    validations:
+      required: true

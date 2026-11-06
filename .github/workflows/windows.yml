@@ -1,0 +1,71 @@
+name: Checks and release
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements-lock.txt
+      - run: python -m venv .venv
+      - run: .venv/Scripts/python -m pip install -r requirements-lock.txt
+      - run: .venv/Scripts/python -m pip install --no-build-isolation --no-deps -e .
+      - name: Cache Qt/PySide source archives
+        uses: actions/cache@v4
+        with:
+          path: licenses/sources
+          key: qt-sources-${{ hashFiles('scripts/prepare_third_party.py') }}
+      - run: .venv/Scripts/python scripts/prepare_third_party.py
+      - run: ./scripts/build_windows.ps1
+        shell: pwsh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MoniRondo-win64
+          path: |
+            dist/MoniRondo-*-win64.zip
+            dist/MoniRondo-*-win64.zip.sha256
+            dist/MoniRondo-*-source.zip
+
+  pure-core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install pytest
+      - run: PYTHONPATH=src python -m pytest -q -m 'not windows'
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [windows, pure-core]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: MoniRondo-win64
+          path: release
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="${TAG#v}"
+          # Use this version's changelog section as release notes.
+          awk -v v="$version" '$0 ~ "^## "v" " {found=1; next} found && /^## / {exit} found' CHANGELOG.md > notes.md
+          gh release create "$TAG" release/* --title "MoniRondo $version" --notes-file notes.md

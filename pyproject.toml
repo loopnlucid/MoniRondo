@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "monirondo"
+version = "1.2.0"
+description = "MoniRondo – swap application windows between Windows monitors with a global hotkey"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "MoniRondo contributors" }]
+keywords = ["windows", "multi-monitor", "window-manager", "hotkey", "tray", "pyside6"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Win32 (MS Windows)",
+    "Intended Audience :: End Users/Desktop",
+    "Natural Language :: English",
+    "Natural Language :: German",
+    "Natural Language :: Spanish",
+    "Natural Language :: French",
+    "Operating System :: Microsoft :: Windows :: Windows 10",
+    "Operating System :: Microsoft :: Windows :: Windows 11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Desktop Environment :: Window Managers",
+    "Topic :: Utilities",
+]
+dependencies = ["PySide6>=6.8,<7", "pywin32>=308; sys_platform == 'win32'"]
+
+[project.urls]
+Homepage = "https://github.com/loopnlucid/MoniRondo"
+Issues = "https://github.com/loopnlucid/MoniRondo/issues"
+Changelog = "https://github.com/loopnlucid/MoniRondo/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "ruff>=0.9", "mypy>=1.14", "pyinstaller>=6.11,<7", "types-pywin32>=308"]
+
+[project.gui-scripts]
+monirondo = "monirondo.app:main"
+# Former name, kept so existing shortcuts and scripts keep working.
+monitorswap = "monirondo.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+monirondo = ["resources/*", "locales/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["windows: native Windows integration", "interactive: moves only explicitly created test windows"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["src"]
+check_untyped_defs = true
+disallow_untyped_defs = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = ["win32api", "win32gui", "win32process", "win32con", "pythoncom", "pywintypes"]
+ignore_missing_imports = true
